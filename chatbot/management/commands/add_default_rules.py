@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from chatbot.models import Rule
 
 class Command(BaseCommand):
-    help = 'Adds default rules for general responses'
+    help = 'Adds or updates default rules for general responses'
 
     def handle(self, *args, **kwargs):
         default_rules = [
@@ -12,7 +12,7 @@ class Command(BaseCommand):
             },
             {
                 'pattern': 'hi',
-                'response': 'Hi there! I can help you with tire specifications and product information. What would you like to know?'
+                'response': 'Hi there! I can help you with Mavis tire specifications and product information. What would you like to know?'
             },
             {
                 'pattern': 'help',
@@ -41,10 +41,15 @@ class Command(BaseCommand):
         ]
 
         for rule_data in default_rules:
-            Rule.objects.get_or_create(
+            rule, created = Rule.objects.update_or_create(
                 pattern=rule_data['pattern'],
                 defaults={'response': rule_data['response']}
             )
-            self.stdout.write(
-                self.style.SUCCESS(f'Successfully added rule: {rule_data["pattern"]}')
-            ) 
+            if created:
+                self.stdout.write(
+                    self.style.SUCCESS(f'Successfully created rule: {rule_data["pattern"]}')
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(f'Successfully updated rule: {rule_data["pattern"]}')
+                ) 
